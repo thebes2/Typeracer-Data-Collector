@@ -1,5 +1,10 @@
 const fetch = require("node-fetch");
-const CSV = require("objects-to-csv");
+const { record } = require('./record');
+const { 
+    fmt, 
+    fail, 
+    delay,
+} = require('./constants')
 
 async function get(url) {
     try {
@@ -11,10 +16,6 @@ async function get(url) {
         return null;
     }
 }
-
-const fmt = 'https://data.typeracer.com/pit/result?id=|tr:*|&';
-const fail = 'Requested data not found.';
-const delay = 100;
 
 function sleep(ms){
     return new Promise(function(res){setTimeout(res, ms || delay)});
@@ -48,35 +49,6 @@ async function dispatch() {
         await sleep(5);
     }
     Promise.all(promises).then(record);
-}
-
-function parseSpecial(str){
-    return str.replace(/&#39;/g, '\'').replace(/&quot;/g, '\"').replace(/&amp;/g, '&').replace(/&gt/g, ">").replace(/&lt/g, "<");
-}
-
-async function record(values) {
-    console.log('Recording data.\n');
-    const wpmRgx = /\d+(?=\sWPM)/g;
-    const accRgx = /(?<=<td>)[0-9\.]+(?=\%)/g;
-    const txtRgx = /(?<=\<div class="fullTextStr"\>)[\s\S]*?(?=\<\/div\>)/g;
-    let res = [];
-
-    for(let i=0;i<values.length;i++){
-        const dat = values[i];
-        if(dat){
-            if(dat.includes(fail)) break;
-
-            const wpm = dat.match(wpmRgx)[0];
-            const acc = dat.match(accRgx)[0];
-            const txt = parseSpecial(dat.match(txtRgx)[0]);
-
-            // console.log(wpm, acc, txt.length);
-            res.push({WPM: wpm, Accuracy: acc, 'Character Count': txt.length});
-        }
-    }
-    const csv = new CSV(res);
-    await csv.toDisk('./result.csv');
-    console.log('done!');
 }
 
 dispatch();

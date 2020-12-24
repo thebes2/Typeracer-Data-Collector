@@ -1,9 +1,14 @@
 // waits for previous get requests to resolve before continuing ("synchronous")
-// very slow when processing 100+ races
+// very slow when processing 50+ races
 // used only for debugging
 
 const fetch = require("node-fetch");
-const CSV = require("objects-to-csv");
+const {
+    fmt,
+    fail,
+} = require('./constants');
+const { record } = require('./record');
+
 
 async function get(url) {
     try {
@@ -16,13 +21,6 @@ async function get(url) {
     }
 }
 
-const fmt = 'https://data.typeracer.com/pit/result?id=|tr:*|&';
-const fail = 'Requested data not found.';
-
-function parseSpecial(str){
-    return str.replace(/&#39;/g, '\'').replace(/&quot;/g, '\"').replace(/&amp;/g, '&').replace(/&gt/g, ">").replace(/&lt/g, "<");
-}
-
 async function main() {
     // usage: 
     // node script.js <typeracer username>
@@ -31,31 +29,20 @@ async function main() {
         process.exit(0);
     }
     const uid = process.argv[2];
-    const wpmRgx = /\d+(?=\sWPM)/g;
-    const accRgx = /(?<=<td>)[0-9\.]+(?=\%)/g;
-    const txtRgx = /(?<=\<div class="fullTextStr"\>)[\s\S]?(?=\<\/div\>)/g;
-    const res = [];
-    for(let i=1;i<2;i++){
+    const raw = [];
+    for(let i=1;;i++){
         if(i%10==1){
-            console.log(`\nRecording race ${i}\n`);
+            console.log(`Dispatching get request ${i}`);
         }
         const url = fmt.replace(/\&/g,i.toString()).replace(/\*/g,uid);
         const dat = await get(url);
         if(dat.includes(fail)) break;
 
-        const wpm = dat.match(wpmRgx)[0];
-        const acc = dat.match(accRgx)[0];
-        const txt = parseSpecial(dat.match(txtRgx)[0]);
-
-
-        // console.log(dat.match(txtRgx));
-        // console.log(dat);
-        // console.log(wpm, acc);
-        res.push({wpm, acc, txt});
+        raw.push(dat);
     }
-    const csv = new CSV(res);
-    await csv.toDisk('./result.csv');
-    console.log('done!');
+    record(raw, function(idx=null, data=null, wpm=null, acc=null, txt=null) {
+        console.log(`${idx}: ${wpm} ${acc} ${txt.length}`);
+    });
 }
 
 main();
