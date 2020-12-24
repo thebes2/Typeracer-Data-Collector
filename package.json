@@ -1,9 +1,11 @@
 {
-  "name": "data-wrangler",
+  "name": "typeracer-data-collector",
   "version": "1.0.0",
   "description": "",
   "main": "script.js",
   "scripts": {
+    "start": "node script.js",
+    "debug": "node script_sync.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "George Chen",

@@ -19,6 +19,10 @@ async function get(url) {
 const fmt = 'https://data.typeracer.com/pit/result?id=|tr:*|&';
 const fail = 'Requested data not found.';
 
+function parseSpecial(str){
+    return str.replace(/&#39;/g, '\'').replace(/&quot;/g, '\"').replace(/&amp;/g, '&').replace(/&gt/g, ">").replace(/&lt/g, "<");
+}
+
 async function main() {
     // usage: 
     // node script.js <typeracer username>
@@ -29,7 +33,7 @@ async function main() {
     const uid = process.argv[2];
     const wpmRgx = /\d+(?=\sWPM)/g;
     const accRgx = /(?<=<td>)[0-9\.]+(?=\%)/g;
-    const txtRgx = /(?<=\<div class="fullTextStr"\>).*?(?=\<\/div\>)/g;
+    const txtRgx = /(?<=\<div class="fullTextStr"\>)[\s\S]?(?=\<\/div\>)/g;
     const res = [];
     for(let i=1;i<2;i++){
         if(i%10==1){
@@ -41,12 +45,13 @@ async function main() {
 
         const wpm = dat.match(wpmRgx)[0];
         const acc = dat.match(accRgx)[0];
+        const txt = parseSpecial(dat.match(txtRgx)[0]);
 
 
         // console.log(dat.match(txtRgx));
         // console.log(dat);
         // console.log(wpm, acc);
-        res.push({wpm, acc});
+        res.push({wpm, acc, txt});
     }
     const csv = new CSV(res);
     await csv.toDisk('./result.csv');
