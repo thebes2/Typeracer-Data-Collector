@@ -10,6 +10,10 @@
   },
   "author": "George Chen",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thebes2/Typeracer-Data-Collector.git"
+  },
   "dependencies": {
     "node-fetch": "^2.6.1",
     "objects-to-csv": "^1.3.6"
