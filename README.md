@@ -6,7 +6,7 @@ Collects data about a user's past races on [typeracer](https://play.typeracer.co
 
 1. Install node. Check that it is installed by running `node --version` in a terminal.
 2. Install npm. Check that it is installed by running `npm --version`.
-3. Pull the repository by either downloading and extracting the zip or executing `git clone https://github.com/thebes2/Typeracer-Data-Collector.git`
+3. Pull the repository by either downloading and extracting the zip or executing `git clone https://github.com/thebes2/Typeracer-Data-Collector.git` in the terminal.
 4. Run `npm install` in the root of the repository. 
 
 ## Usage
